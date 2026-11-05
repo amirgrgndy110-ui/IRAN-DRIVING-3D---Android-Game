@@ -1,0 +1,39 @@
+name: IRAN DRIVING 3D APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract Unity project ZIP
+        run: |
+          mkdir -p extracted
+          unzip -q IRAN_DRIVING_3D_Android_Ready.zip -d extracted
+          test -f extracted/IRAN_DRIVING_3D_Project/ProjectSettings/ProjectVersion.txt
+
+      - name: Build Android APK
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: extracted/IRAN_DRIVING_3D_Project
+          unityVersion: 6000.0.23f1
+          targetPlatform: Android
+          buildMethod: Stage2BuildEntry.Build
+          buildsPath: build
+          versioning: None
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: IRAN-DRIVING-3D-APK
+          path: build/**/*.apk
+          if-no-files-found: error
